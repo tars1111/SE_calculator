@@ -9,7 +9,7 @@
 '''
 
 import math
-
+from SE import *
 
 def add(x, y):
     return x + y
@@ -29,16 +29,16 @@ def divide(x, y):
     return x / y
 
 
-def sin_func(angle):
-    return math.sin(math.radians(angle))
+# def sin_func(angle):
+#     return math.sin(math.radians(angle))
 
 
-def cos_func(angle):
-    return math.cos(math.radians(angle))
+# def cos_func(angle):
+#     return math.cos(math.radians(angle))
 
 
-def tan_func(angle):
-    return math.tan(math.radians(angle))
+# def tan_func(angle):
+#     return math.tan(math.radians(angle))
 
 
 def main():
@@ -75,13 +75,13 @@ def main():
         elif choice in ['5', '6', '7']:
             angle = float(input("请输入角度（度）："))
             if choice == '5':
-                result = sin_func(angle)
+                result = my_sin(angle)
                 print(f"sin({angle}) = {result}")
             elif choice == '6':
-                result = cos_func(angle)
+                result = my_cos(angle)
                 print(f"cos({angle}) = {result}")
             elif choice == '7':
-                result = tan_func(angle)
+                result = my_tan(angle)
                 print(f"tan({angle}) = {result}")
         elif choice == '8':
             print("感谢使用计算器！")

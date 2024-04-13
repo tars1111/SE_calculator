@@ -1,79 +1,59 @@
-#!/usr/bin/env python3
-# -*- encoding: utf-8 -*-
-'''
-@File    :   test_calculator_all.py    
-@Contact :   zhu1956318525@163.com
-@Modify Time      @Author    @Version    @Desciption
-------------      -------    --------    -----------
-2024/4/6 17:21   浛颖      1.0         使用了Python的unittest模块，分别对加法、减法、乘法、除法以及三角函数计算功能进行了测试
-'''
-
 import unittest
-from SE_calculator import add, subtract, multiply, divide, sin_func, cos_func, tan_func
+import math
+from SE import *
 
-class TestCalculator(unittest.TestCase):
 
-    def test_add(self):
-        result = add(3, 5)
-        self.assertEqual(result, 8)
 
-        result = add(-2, 2)
-        self.assertEqual(result, 0)
+class TestFunc(unittest.TestCase):         # 测试类
 
-        result = add(0, 0)
-        self.assertEqual(result, 0)
+    def test_arcsin(self):                 # 测试arcsin函数
+        self.assertEqual(math.degrees(math.asin(0)), arcsin_taylor(0))
+        self.assertEqual(math.degrees(math.asin(0.7071)), arcsin_taylor(0.7071))
+        self.assertEqual(math.degrees(math.asin(0.8660)), arcsin_taylor(0.8660))
+        self.assertEqual(math.degrees(math.asin(1)), arcsin_taylor(1))
+        self.assertEqual(math.degrees(math.asin(-1)), arcsin_taylor(-1))
+        self.assertEqual(math.degrees(math.asin(-0.8660)), arcsin_taylor(-0.8660))
 
-    def test_subtract(self):
-        result = subtract(5, 3)
-        self.assertEqual(result, 2)
+    def test_arccos(self):                  # 测试arccos函数
+        self.assertEqual(math.degrees(math.acos(0)), arccos_taylor(0))
+        self.assertEqual(math.degrees(math.acos(0.7071)), arccos_taylor(0.7071))
+        self.assertEqual(math.degrees(math.acos(1)), arccos_taylor(1))
+        self.assertEqual(math.degrees(math.acos(-0.7071)), arccos_taylor(-0.7071))
+        self.assertEqual(math.degrees(math.acos(-1)), arccos_taylor(-1))
+        self.assertEqual(math.degrees(math.acos(-0.8660)), arccos_taylor(-0.8660))
 
-        result = subtract(2, -2)
-        self.assertEqual(result, 4)
+    def test_arctan(self):                 # 测试arctan函数
+        self.assertEqual(math.degrees(math.atan(0)), atan_taylor(0))
+        self.assertEqual(math.degrees(math.atan(0.5773)), atan_taylor(0.5773))
+        self.assertEqual(math.degrees(math.atan(1)), atan_taylor(1))
+        self.assertEqual(math.degrees(math.atan(1.732)), atan_taylor(1.732))
+        self.assertEqual(math.degrees(math.atan(0)),atan_taylor(0))
+        self.assertEqual(math.degrees(math.atan(-0.5773)), atan_taylor(-0.5773))
+        self.assertEqual(math.degrees(math.atan(-1)), atan_taylor(-1))
+        self.assertEqual(math.degrees(math.atan(-1.732)), atan_taylor(-1.732))
 
-        result = subtract(0, 0)
-        self.assertEqual(result, 0)
+    def test_cos(self):                    # 测试cos函数
+        self.assertEqual(math.cos(math.radians(30)), cos_taylor(30))
+        self.assertEqual(math.cos(math.radians(60)), cos_taylor(60))
+        self.assertEqual(math.cos(math.radians(90)),cos_taylor(90))
+        self.assertEqual(math.cos(math.radians(120)), cos_taylor(120))
+        self.assertEqual(math.cos(math.radians(180)), cos_taylor(180))
 
-    def test_multiply(self):
-        result = multiply(3, 5)
-        self.assertEqual(result, 15)
 
-        result = multiply(-2, 2)
-        self.assertEqual(result, -4)
+    def test_sin(self):                    # 测试sin函数
+        self.assertEqual(math.sin(math.radians(30)), sin_taylor(30))
+        self.assertEqual(math.sin(math.radians(60)), sin_taylor(60))
+        self.assertEqual(math.sin(math.radians(90)), sin_taylor(90))
+        self.assertEqual(math.sin(math.radians(120)), sin_taylor(120))
+        self.assertEqual(math.sin(math.radians(180)), sin_taylor(180))
 
-        result = multiply(0, 5)
-        self.assertEqual(result, 0)
 
-    def test_divide(self):
-        result = divide(10, 2)
-        self.assertEqual(result, 5)
+    def test_tan(self):                     # 测试tan函数
+        self.assertEqual(math.tan(math.radians(30)), tan_taylor(30))
+        self.assertEqual(math.tan(math.radians(60)), tan_taylor(60))
+        self.assertEqual(math.tan(math.radians(120)), tan_taylor(120))
+        self.assertEqual(math.tan(math.radians(180)), tan_taylor(180))
 
-        result = divide(5, 0)
-        self.assertEqual(result, "Error: 除数不能为0")
-
-    def test_sin_func(self):
-        result = sin_func(30)
-        self.assertAlmostEqual(result, 0.5, places=2)
-
-        result = sin_func(45)
-        self.assertAlmostEqual(result, 0.7071, places=4)
-
-        result = sin_func(90)
-        self.assertAlmostEqual(result, 1.0, places=2)
-
-    def test_cos_func(self):
-        result = cos_func(60)
-        self.assertAlmostEqual(result, 0.5, places=2)
-
-        result = cos_func(90)
-        self.assertAlmostEqual(result, 0.0, places=2)
-
-    def test_tan_func(self):
-        result = tan_func(45)
-        self.assertAlmostEqual(result, 1.0, places=2)
-
-        result = tan_func(60)
-        self.assertAlmostEqual(result, 1.7321, places=4)
 
 if __name__ == '__main__':
     unittest.main()
-

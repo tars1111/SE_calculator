@@ -29,17 +29,6 @@ def divide(x, y):
     return x / y
 
 
-# def sin_func(angle):
-#     return math.sin(math.radians(angle))
-
-
-# def cos_func(angle):
-#     return math.cos(math.radians(angle))
-
-
-# def tan_func(angle):
-#     return math.tan(math.radians(angle))
-
 
 def main():
     print("欢迎使用计算器！")
@@ -52,7 +41,10 @@ def main():
         print("5. 正弦函数")
         print("6. 余弦函数")
         print("7. 正切函数")
-        print("8. 退出")
+        print("8. 反正弦函数")
+        print("9. 反余弦函数")
+        print("10. 反正切函数")
+        print("11. 退出")
 
         choice = input("请输入选项：")
 
@@ -75,19 +67,33 @@ def main():
         elif choice in ['5', '6', '7']:
             angle = float(input("请输入角度（度）："))
             if choice == '5':
-                result = my_sin(angle)
+                result = sin_taylor(angle)
                 print(f"sin({angle}) = {result}")
             elif choice == '6':
-                result = my_cos(angle)
+                result = cos_taylor(angle)
                 print(f"cos({angle}) = {result}")
             elif choice == '7':
-                result = my_tan(angle)
+                result = tan_taylor(angle)
                 print(f"tan({angle}) = {result}")
-        elif choice == '8':
+
+        elif choice in ['8', '9', '10']:
+            angle = float(input("请输入弧度："))
+            if choice == '8':
+                result = arcsin_taylor(angle)
+                print(f"asin({angle}) = {result}")
+            elif choice == '9':
+                result = arccos_taylor(angle)
+                print(f"acos({angle}) = {result}")
+            elif choice == '10':
+                result = atan_taylor(angle)
+                print(f"atan({angle}) = {result}")
+        elif choice == '11':
             print("感谢使用计算器！")
             break
         else:
             print("无效选项，请重新输入！")
+
+
 
 
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ class Calculator(QWidget):
         self.line_edit.setAlignment(Qt.AlignRight)
         self.line_edit.setValidator(validator)
         self.line_edit.setReadOnly(True)
-        #历史记录
+        # 历史记录
         self.history = []
         self.history_capacity = 5
 
@@ -271,7 +271,7 @@ class Calculator(QWidget):
                 result = atan_taylor(float(self.num))
             else:
                 self.raiseError()
-            self.add_to_history(self.operators_way, self.num, result)
+            self.add_to_history(self.operators_way, result)
         except ValueError as e:
             # 处理值错误，例如字符串到数字的转换失败
             self.handle_error("输入的值无效。")
@@ -282,18 +282,13 @@ class Calculator(QWidget):
             # 处理其他类型的异常
             self.handle_error(str(e))
         return result
-    
-    def add_to_history(self, operation, num, result):
-        # 将操作和结果格式化为字符串
-        if operation in ["arcsin", "arccos", "arctan"]:
-            num = str(num)
-            operation = operation + " "
-            result = str(result) + '°'
-        elif operation in ["sin", "cos", "tan"]:
-            num = str(num) + '°'
-            operation = operation + " "
-        history_entry = f"{operation + num} = {result}"
 
+    def add_to_history(self, operation, result):
+        # 将操作和结果格式化为字符串
+        if operation in ["sin", "cos", "tan"]:
+            history_entry = f"{operation}({self.num}°) = {result}"
+        else:
+            history_entry = f"{operation}({self.num}) = {result}°"
         # 如果历史记录达到容量上限，则移除最早的记录
         if len(self.history) >= self.history_capacity:
             self.history.pop(0)
@@ -303,6 +298,7 @@ class Calculator(QWidget):
 
         # 更新历史显示
         self.update_history_display()
+
     def update_history_display(self):
         # 更新历史显示
         self.history_text.setPlainText("\n".join(self.history))

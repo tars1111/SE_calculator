@@ -5,8 +5,8 @@
 import sys
 
 from PyQt5.QtWidgets import (QWidget, QApplication,
-                             QLineEdit, QPushButton, QGridLayout, QSizePolicy)
-from PyQt5.QtGui import QRegExpValidator
+                             QLineEdit, QPushButton, QGridLayout, QTextEdit, QSizePolicy)
+from PyQt5.QtGui import QRegExpValidator, QFont
 from PyQt5.QtCore import Qt, QRegExp
 from SE import *
 
@@ -15,7 +15,6 @@ class Calculator(QWidget):
     """
     计算器的基本页面的基本界面, 完成基本的计算
     """
-
 
     def __init__(self):
         super(Calculator, self).__init__()
@@ -32,10 +31,9 @@ class Calculator(QWidget):
         self.calCompleted = False
         self.num = ""
 
-
-
     def ui(self):
         # 这个函数主要适用于初始化界面
+        super(Calculator, self).__init__()
         reg = QRegExp("^$")  # 把键盘禁用了, 仅可以按钮的输入
         validator = QRegExpValidator(reg, self)
 
@@ -45,6 +43,9 @@ class Calculator(QWidget):
         self.line_edit.setAlignment(Qt.AlignRight)
         self.line_edit.setValidator(validator)
         self.line_edit.setReadOnly(True)
+        #历史记录
+        self.history = []
+        self.history_capacity = 5
 
         #  使用girdlayout进行界面布局
         grid = QGridLayout()
@@ -61,12 +62,33 @@ class Calculator(QWidget):
         grid.addWidget(self.line_edit, 0, 0, 1, 4)
         positions = [(i, j) for i in range(1, 6) for j in range(4)]
         self.buttons = []
+        style = """
+            QPushButton {
+                background-color: #f0f0f0;
+                border: 1px solid #dcdcdc;
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                background-color: #e0e0e0;
+            }
+        """
+        self.setStyleSheet(style)
+
+        # 设置文本框的字体大小
+        self.line_edit.setFont(QFont("Arial", 18))
+
+        # 创建一个文本区域用于显示历史记录
+        self.history_text = QTextEdit(self)
+        self.history_text.setReadOnly(True)  # 设置为只读
+        self.history_text.setMaximumHeight(80)  # 设置最大高度
+        grid.addWidget(self.history_text, 7, 0, 1, 4)  # 添加到布局中
+        # 由于我们设置了统一的样式，可以简化addWidget的循环
         for pos, name in zip(positions, btn_names):
             if name == '':
                 continue
             btn = QPushButton(name)
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            # 在布局的时候，直接把每个按钮连接到点击事件上
             btn.clicked.connect(self.show_msg)
             self.buttons.append(btn)
             grid.addWidget(btn, *pos)
@@ -76,13 +98,13 @@ class Calculator(QWidget):
         self.setGeometry(300, 150, 600, 700)  # Set initial size and position
         self.show()
 
-    def raiseError(self):  #报错函数
+    def raiseError(self):
         self.line_edit.setText('Error')
         for button in self.buttons:
             button.setEnabled(False)
         self.buttons[0].setEnabled(True)
 
-    def numEnabled(self, enabled: bool): #按键使能函数
+    def numEnabled(self, enabled: bool):
         self.buttons[4].setEnabled(enabled)
         self.buttons[5].setEnabled(enabled)
         self.buttons[6].setEnabled(enabled)
@@ -95,12 +117,12 @@ class Calculator(QWidget):
         self.buttons[16].setEnabled(enabled)
         self.buttons[17].setEnabled(enabled)
 
-    def resizeEvent(self, event):  #窗口大小设置
+    def resizeEvent(self, event):
         # Adjust font size based on the widget size
         self.adjust_font_size()
         super().resizeEvent(event)
 
-    def adjust_font_size(self):  #自适应字体大小
+    def adjust_font_size(self):
         width = self.width()
         height = self.height()
 
@@ -114,7 +136,7 @@ class Calculator(QWidget):
         for btn in self.buttons:
             btn.setFont(font)
 
-    def clear_line_edit(self):  #清空函数
+    def clear_line_edit(self):
         for button in self.buttons:
             button.setEnabled(True)
         self.line_edit.clear()
@@ -128,13 +150,13 @@ class Calculator(QWidget):
         self.num_operator = False
         self.operators_way = None
 
-    def deal_negative_btn(self):  #负号函数
+    def deal_negative_btn(self):
         if self.operators_way and not self.num_operator:
             self.num += '-'
             self.line_edit.setText(self.operators_way + '(' + self.num + ')')
             self.num_operator = True
 
-    def deal_num_btn(self, sender_text):  #输入数字识别
+    def deal_num_btn(self, sender_text):
         _str = self.line_edit.text()
         if _str == '0' or self.empty_flag:
             self.line_edit.clear()
@@ -158,7 +180,7 @@ class Calculator(QWidget):
             self.empty_flag = True
             self.num_operator = False
 
-    def deal_operator_btn(self, sender_text):  #输入操作符识别
+    def deal_operator_btn(self, sender_text):
         # 操作符号
         if self.empty_flag and not self.after_operator:
             self.line_edit.clear()
@@ -175,7 +197,7 @@ class Calculator(QWidget):
             self.raiseError()
             self.after_operator = False
 
-    def deal_point_btn(self):  #输入小数点识别
+    def deal_point_btn(self):
         if self.after_operator and not self.num_operator:
             self.raiseError()
         elif self.after_operator and self.num != '-':
@@ -190,7 +212,7 @@ class Calculator(QWidget):
         else:
             self.raiseError()
 
-    def deal_equal_btn(self):  #输入等号识别
+    def deal_equal_btn(self):
         _str = self.line_edit.text()
         if self.after_operator and self.num_operator:
             result = self.compute()
@@ -205,52 +227,86 @@ class Calculator(QWidget):
             self.clear_line_edit()
             self.line_edit.setText(_str)
 
-    def compute(self):  #计算函数
-        result = None
-        if 'sin' == self.operators_way:
-            result = sin_taylor(float(self.num))
-        if 'cos' == self.operators_way:
-            result = cos_taylor(float(self.num))
-        if 'tan' == self.operators_way:
-            if (float(self.num) + 90) % 180 == 0:
-                result = "inf"
-            else:
-                result = tan_taylor(float(self.num))
-        if 'arcsin' == self.operators_way:
-            if float(self.num) == -1:
-                result = -90
-            elif float(self.num) == 1:
-                result = 90
-            else:
-                if -1 < float(self.num) < -0.99999:
-                    c_9 = arcsin_taylor(-0.99999)
-                    result = -90 + (float(self.num) - (-1)) * (c_9 - (-90)) / (-0.99999 - (-1))
-                elif 0.99999 < float(self.num) < 1:
-                    c9 = arcsin_taylor(0.99999)
-                    result = c9 + (float(self.num) - 0.99999) * (90 - c9) / (1 - 0.99999)
+    def compute(self):
+        try:
+            result = None
+            if 'sin' == self.operators_way:
+                result = sin_taylor(float(self.num))
+            if 'cos' == self.operators_way:
+                result = cos_taylor(float(self.num))
+            if 'tan' == self.operators_way:
+                if (float(self.num) + 90) % 180 == 0:
+                    result = "inf"
                 else:
-                    result = arcsin_taylor(float(self.num))
-        if 'arccos' == self.operators_way:
-            if float(self.num) == -1:
-                result = 180
-            elif float(self.num) == 1:
-                result = 0
-            else:
-                if -1 < float(self.num) < -0.99999:
-                    c_9 = arccos_taylor(-0.99999)
-                    result = 180 + (float(self.num) - (-1)) * (c_9 - 180) / (-0.99999 - (-1))
-                elif 0.99999 < float(self.num) < 1:
-                    c9 = arccos_taylor(0.99999)
-                    result = c9 + (float(self.num) - 0.99999) * (0 - c9) / (1 - 0.99999)
+                    result = tan_taylor(float(self.num))
+            if 'arcsin' == self.operators_way:
+                if float(self.num) == -1:
+                    result = -90
+                elif float(self.num) == 1:
+                    result = 90
                 else:
-                    result = arccos_taylor(float(self.num))
-        if 'arctan' == self.operators_way:
-            result = atan_taylor(float(self.num))
-        else:
-            self.raiseError()
+                    if -1 < float(self.num) < -0.99999:
+                        c_9 = arcsin_taylor(-0.99999)
+                        result = -90 + (float(self.num) - (-1)) * (c_9 - (-90)) / (-0.99999 - (-1))
+                    elif 0.99999 < float(self.num) < 1:
+                        c9 = arcsin_taylor(0.99999)
+                        result = c9 + (float(self.num) - 0.99999) * (90 - c9) / (1 - 0.99999)
+                    else:
+                        result = arcsin_taylor(float(self.num))
+            if 'arccos' == self.operators_way:
+                if float(self.num) == -1:
+                    result = 180
+                elif float(self.num) == 1:
+                    result = 0
+                else:
+                    if -1 < float(self.num) < -0.99999:
+                        c_9 = arccos_taylor(-0.99999)
+                        result = 180 + (float(self.num) - (-1)) * (c_9 - 180) / (-0.99999 - (-1))
+                    elif 0.99999 < float(self.num) < 1:
+                        c9 = arccos_taylor(0.99999)
+                        result = c9 + (float(self.num) - 0.99999) * (0 - c9) / (1 - 0.99999)
+                    else:
+                        result = arccos_taylor(float(self.num))
+            if 'arctan' == self.operators_way:
+                result = atan_taylor(float(self.num))
+            else:
+                self.raiseError()
+            self.add_to_history(self.operators_way, result)
+        except ValueError as e:
+            # 处理值错误，例如字符串到数字的转换失败
+            self.handle_error("输入的值无效。")
+        except OverflowError as e:
+            # 处理数值溢出错误
+            self.handle_error("数值太大，无法计算。")
+        except Exception as e:
+            # 处理其他类型的异常
+            self.handle_error(str(e))
         return result
+    
+    def add_to_history(self, operation, result):
+        # 将操作和结果格式化为字符串
+        history_entry = f"{operation} = {result}"
 
-    def show_msg(self):  #处理信号
+        # 如果历史记录达到容量上限，则移除最早的记录
+        if len(self.history) >= self.history_capacity:
+            self.history.pop(0)
+
+        # 将新记录添加到历史记录列表的末尾
+        self.history.append(history_entry)
+
+        # 更新历史显示
+        self.update_history_display()
+    def update_history_display(self):
+        # 更新历史显示
+        self.history_text.setPlainText("\n".join(self.history))
+
+    def handle_error(self, message):
+        # 显示错误信息
+        self.line_edit.setText("Error")
+        self.numEnabled(False)  # 禁用数字按钮
+        self.raiseError()  # 可能需要根据实际情况调整或添加这个方法
+
+    def show_msg(self):
         # 看ui函数，每个按钮都连接了show_msg的点击事件
         sender = self.sender()
         sender_text = sender.text()
